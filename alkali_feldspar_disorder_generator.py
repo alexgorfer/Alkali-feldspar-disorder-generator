@@ -1,36 +1,15 @@
 # %%
-
-from audioop import minmax
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-import os
-import re
-
 import random
-
-
-import numpy as np
 
 import ase
 import ase.io
 import ase.io.cif
-
 import ase.io.vasp
 import ase.io.lammpsdata
 
-
-from ase import Atoms
-from ase.io import read
-
-import ase.io.cif
-
 from io import StringIO
 
-from pprint import pprint
-
 import argparse
-
 
 try:
     import sqsgenerator
