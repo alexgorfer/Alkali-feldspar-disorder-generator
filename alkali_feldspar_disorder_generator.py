@@ -13,12 +13,12 @@ import argparse
 try:
     import sqsgenerator
     from sqsgenerator import from_ase_atoms
+
     has_sqsgenerator = True
 
 except ImportError:
     has_sqsgenerator = False
     ## We dont need to use the bool I guess
-
 
 
 def build_reference_system(x_dim, y_dim, z_dim):
@@ -30,7 +30,7 @@ def build_reference_system(x_dim, y_dim, z_dim):
     # 'Allan D R'
     # 'Angel R J'
     # _journal_name_full 'European Journal of Mineralogy'
-    # _journal_volume 9 
+    # _journal_volume 9
     # _journal_year 1997
     # _journal_page_first 263
     # _journal_page_last 275
@@ -84,7 +84,8 @@ def build_reference_system(x_dim, y_dim, z_dim):
 
     ##### BUT .cif in ase doesnt like C-1 space group, lets work in lammpsdata ####
 
-    Microcline_with_Al_Order_Logic_Embedded_File= StringIO("""
+    Microcline_with_Al_Order_Logic_Embedded_File = StringIO(
+        """
     # Microcline - (K.986 Na.014) (Al1.03 Si2.97) O8
     
             52  atoms
@@ -158,14 +159,19 @@ def build_reference_system(x_dim, y_dim, z_dim):
             50    4      2.098280709937       8.850035883895       4.979452083016
             51    5      4.861022044617       4.935260867436       4.273192776511
             52    6      5.028360117499       7.962901520374       4.213581899265
-    """)
+    """
+    )
 
-    Microcline_Dummy_Elements = ase.io.lammpsdata.read_lammps_data(Microcline_with_Al_Order_Logic_Embedded_File, style="atomic", sort_by_id=True)
+    Microcline_Dummy_Elements = ase.io.lammpsdata.read_lammps_data(
+        Microcline_with_Al_Order_Logic_Embedded_File, style="atomic", sort_by_id=True
+    )
 
-
-    config = ase.build.make_supercell(Microcline_Dummy_Elements, [[x_dim, 0, 0], [0, y_dim, 0], [0, 0, z_dim]])
+    config = ase.build.make_supercell(
+        Microcline_Dummy_Elements, [[x_dim, 0, 0], [0, y_dim, 0], [0, 0, z_dim]]
+    )
 
     return config
+
 
 def allUnique(x):
     seen = set()
@@ -175,18 +181,19 @@ def allUnique(x):
 def parse_command_line(args=None):
     parser = argparse.ArgumentParser(description="Process some stuff.")
     parser.add_argument("--Na_fraction", type=float, help="")
-    parser.add_argument("--T1O_frac", type=float, nargs='?', default=1.0)
-    parser.add_argument("--T1M_frac", type=float, nargs='?', default=0.0)
-    parser.add_argument("--T2O_frac", type=float, nargs='?', default=0.0)
-    parser.add_argument("--T2M_frac", type=float, nargs='?', default=0.0)
+    parser.add_argument("--T1O_frac", type=float, nargs="?", default=1.0)
+    parser.add_argument("--T1M_frac", type=float, nargs="?", default=0.0)
+    parser.add_argument("--T2O_frac", type=float, nargs="?", default=0.0)
+    parser.add_argument("--T2M_frac", type=float, nargs="?", default=0.0)
 
-    parser.add_argument('--supercell_dim', type=int, nargs=3, help="")
+    parser.add_argument("--supercell_dim", type=int, nargs=3, help="")
 
     parser.add_argument("--sqsGen_NaK", action="store_true")
 
     args = parser.parse_args()
 
     return args
+
 
 def main():
 
@@ -200,10 +207,10 @@ def main():
     if not (T1O_frac + T1M_frac + T2O_frac + T2M_frac) == float(1):
         raise ValueError("Fractions do not sum to 1")
 
-    T1O_bool = (T1O_frac > 0)
-    T1M_bool = (T1M_frac > 0)
-    T2O_bool = (T2O_frac > 0)
-    T2M_bool = (T2M_frac > 0)
+    T1O_bool = T1O_frac > 0
+    T1M_bool = T1M_frac > 0
+    T2O_bool = T2O_frac > 0
+    T2M_bool = T2M_frac > 0
 
     print("T1O_bool = ", T1O_bool)
     print("T1M_bool = ", T1M_bool)
@@ -227,25 +234,25 @@ def main():
 
     for i in range(len(config.get_chemical_symbols())):
         element = config.get_chemical_symbols()[i]
-        
-        if element == 'Li':         # Type 3 becomes Li, flag for T1O
+
+        if element == "Li":  # Type 3 becomes Li, flag for T1O
             T1O_site_IDS.append(i)
-        elif element == 'Be':       # Type 4 -> T1M
+        elif element == "Be":  # Type 4 -> T1M
             T1M_site_IDS.append(i)
-        elif element == 'B':        # Type 5 -> T2O
+        elif element == "B":  # Type 5 -> T2O
             T2O_site_IDS.append(i)
-        elif element == 'C':        # Type 6 -> T2M
+        elif element == "C":  # Type 6 -> T2M
             T2M_site_IDS.append(i)
 
         # We want to convert to start with ordered Microcline
-        if element == 'H':
-            elements_initialize.append('O')
-        elif element == 'He':
-            elements_initialize.append('K')
-        elif element == 'Li':
-            elements_initialize.append('Al')
+        if element == "H":
+            elements_initialize.append("O")
+        elif element == "He":
+            elements_initialize.append("K")
+        elif element == "Li":
+            elements_initialize.append("Al")
         else:
-            elements_initialize.append('Si')
+            elements_initialize.append("Si")
 
     Possible_Al_sites = []
 
@@ -258,74 +265,88 @@ def main():
     if T2M_bool:
         Possible_Al_sites.extend(T2M_site_IDS)
 
-
     config.set_chemical_symbols(elements_initialize)
 
     element_list = config.get_chemical_symbols()
 
     ### We first construct the Na/K distribution
     if sqsgenerator_NaK:
-        print("""sqsGenerator is a software developed by Dominik Gehringer
+        print(
+            """sqsGenerator is a software developed by Dominik Gehringer
                  and is available at https://github.com/dgehringer/sqsgenerator
-                 see also "Models of configurationally-complex alloys made simple": https://doi.org/10.1016/j.cpc.2023.108664""")
+                 see also "Models of configurationally-complex alloys made simple": https://doi.org/10.1016/j.cpc.2023.108664"""
+        )
 
-        N_Na = int(element_list.count('K')*Na_fraction)
-        N_K = element_list.count('K') - N_Na
+        N_Na = int(element_list.count("K") * Na_fraction)
+        N_K = element_list.count("K") - N_Na
 
         sqs_config = from_ase_atoms(config)  # Convert to sqsgenerator structure
 
         try:
             configuration = dict(
                 structure=sqs_config,
-                iterations=1e7, # 1e9 is in guide
-                shell_weights={1: 1.0,
-                            2: 1/2,
-                            3: 1/3,
-                            4: 1/4,
-                            5: 1/5,
-                            6: 1/6,
-                            7: 1/7,
-                            8: 1/8,
-                            9: 1/9,
-                            10: 1/10
-                            },
-                which='K',
-                composition=dict(Na=N_Na, K=N_K)
+                iterations=1e7,  # 1e9 is in guide
+                shell_weights={
+                    1: 1.0,
+                    2: 1 / 2,
+                    3: 1 / 3,
+                    4: 1 / 4,
+                    5: 1 / 5,
+                    6: 1 / 6,
+                    7: 1 / 7,
+                    8: 1 / 8,
+                    9: 1 / 9,
+                    10: 1 / 10,
+                },
+                which="K",
+                composition=dict(Na=N_Na, K=N_K),
             )
 
-            results = sqsgenerator.public.sqs_optimize(configuration, pass_structure=True, structure_format='ase', make_structures=True)
+            results = sqsgenerator.public.sqs_optimize(
+                configuration,
+                pass_structure=True,
+                structure_format="ase",
+                make_structures=True,
+            )
 
         except sqsgenerator.settings.exceptions.BadSettings:
             # system probably too small for shell 10
             configuration = dict(
                 structure=sqs_config,
-                iterations=1e7, # 1e9 is in guide
-                which='K',
-                composition=dict(Na=N_Na, K=N_K)
+                iterations=1e7,  # 1e9 is in guide
+                which="K",
+                composition=dict(Na=N_Na, K=N_K),
             )
 
-            results = sqsgenerator.public.sqs_optimize(configuration, pass_structure=True, structure_format='ase', make_structures=True)
+            results = sqsgenerator.public.sqs_optimize(
+                configuration,
+                pass_structure=True,
+                structure_format="ase",
+                make_structures=True,
+            )
 
         print("sqsGenerator results for Na/K distribution:")
         print(results)
-        config_return = results[0][next(iter(results[0]))]['structure']
+        config_return = results[0][next(iter(results[0]))]["structure"]
         print(config_return)
 
         config = config_return
 
     else:
         ### Just change Na_fraction * K atoms to Na atoms randomly
-        K_to_change = random.sample(range(element_list.count('K')), int(element_list.count('K')*Na_fraction))
+        K_to_change = random.sample(
+            range(element_list.count("K")), int(element_list.count("K") * Na_fraction)
+        )
 
         element_transform = []
         K_Count = -1
         for i in range(len(element_list)):
-            if element_list[i] == 'K':
+            if element_list[i] == "K":
                 K_Count += 1
                 if K_Count in K_to_change:
-                    element_transform.append('Na')
+                    element_transform.append("Na")
                 else:
-                    element_transform.append('K')
+                    element_transform.append("K")
             else:
                 element_transform.append(element_list[i])
 
@@ -341,41 +362,44 @@ def main():
     ###### 3. Random distribution of Al and Si atoms + Löwenstein rule is fulfilled + T fractions are fulfilled
 
     ### The algorithm has no problems with the concentrations that one might see in Nature like:
-            # Any T1O + T1M                     (such as --T1O_frac 0.5 --T1M_frac 0.5 ~~ Orthoclase (kinda))
-            # Any T1O + T1M + T2O + T2M         (such as --T1O_frac 0.25 --T1M_frac 0.25 --T2O_frac 0.25 --T2M_frac 0.25 ~~ Sanidine)
-            # Just T1O                          (such as --T1O_frac 1.0 ~~ Microcline)
+    # Any T1O + T1M                     (such as --T1O_frac 0.5 --T1M_frac 0.5 ~~ Orthoclase (kinda))
+    # Any T1O + T1M + T2O + T2M         (such as --T1O_frac 0.25 --T1M_frac 0.25 --T2O_frac 0.25 --T2M_frac 0.25 ~~ Sanidine)
+    # Just T1O                          (such as --T1O_frac 1.0 ~~ Microcline)
     ### For strange concentrations like (T1O + T2M) or (T2O + T1M) the algorithm has to take some roundabout ways
-    ### (basically optimizer steps in the wrong direction to get over a hill) that might take significant longer 
+    ### (basically optimizer steps in the wrong direction to get over a hill) that might take significant longer
     ### to converge since its not tweaked for these cases.
-
-
 
     ###### 1. Random distribution of Al and Si atoms ######
 
-    Al_to_change = random.sample(Possible_Al_sites, int(element_list.count('Al')))
+    Al_to_change = random.sample(Possible_Al_sites, int(element_list.count("Al")))
 
-    print("allUnique() Sanity Checks passed?:", allUnique(Possible_Al_sites), allUnique(Al_to_change))
+    print(
+        "allUnique() Sanity Checks passed?:",
+        allUnique(Possible_Al_sites),
+        allUnique(Al_to_change),
+    )
 
     element_transform = []
 
     for i in range(len(element_list)):
-        if i in Al_to_change and not(i in Possible_Al_sites):
+        if i in Al_to_change and not (i in Possible_Al_sites):
             raise ValueError("Al_to_change" + str(i) + " not in Possible_Al_sites")
-        if element_list[i] == 'Al':
-            element_transform.append('Si')
+        if element_list[i] == "Al":
+            element_transform.append("Si")
         else:
             element_transform.append(element_list[i])
 
     for id in Al_to_change:
-        element_transform[id] = 'Al'
+        element_transform[id] = "Al"
 
     config.set_chemical_symbols(element_transform)
 
-
     ###### 2. Random distribution of Al and Si atoms + Löwenstein rule is fulfilled ######
 
-    cutoff = [1.7]*len(element_list)
-    neighbours = ase.neighborlist.NeighborList(cutoff, skin=0, self_interaction=False, bothways=True)
+    cutoff = [1.7] * len(element_list)
+    neighbours = ase.neighborlist.NeighborList(
+        cutoff, skin=0, self_interaction=False, bothways=True
+    )
     neighbours.update(config)
 
     for k in range(2000):
@@ -389,16 +413,22 @@ def main():
                 no_Al = True
                 Si_Al_sanity_int = 0
                 for n in neighbours.get_neighbors(i)[0]:
-                    if config.get_chemical_symbols()[n] == 'Al':
+                    if config.get_chemical_symbols()[n] == "Al":
                         no_Al = False
                         Si_Al_sanity_int += 1
-                    elif config.get_chemical_symbols()[n] == 'Si':
+                    elif config.get_chemical_symbols()[n] == "Si":
                         Si_Al_sanity_int += 1
                 if not no_Al:
                     Al_sites_w_Al_n.append(i)
 
                 if Si_Al_sanity_int != 4:
-                    raise ValueError("Al " + str(i) + " has " + str(Si_Al_sanity_int) + " neighbours.")
+                    raise ValueError(
+                        "Al "
+                        + str(i)
+                        + " has "
+                        + str(Si_Al_sanity_int)
+                        + " neighbours."
+                    )
 
             if config.get_chemical_symbols()[i] == "Si" and i in Possible_Al_sites:
                 SiNr += 1
@@ -406,23 +436,31 @@ def main():
                 Si_Al_sanity_int = 0
 
                 for n in neighbours.get_neighbors(i)[0]:
-                    if config.get_chemical_symbols()[n] == 'Al':
+                    if config.get_chemical_symbols()[n] == "Al":
                         no_Al = False
                         Si_Al_sanity_int += 1
-                    elif config.get_chemical_symbols()[n] == 'Si':
+                    elif config.get_chemical_symbols()[n] == "Si":
                         Si_Al_sanity_int += 1
 
                 if no_Al:
                     Possible_Si_sites_w_4_Si.append(i)
                 if Si_Al_sanity_int != 4:
-                    raise ValueError("Si " + str(i) + " has " + str(Si_Al_sanity_int) + " neighbours.")
+                    raise ValueError(
+                        "Si "
+                        + str(i)
+                        + " has "
+                        + str(Si_Al_sanity_int)
+                        + " neighbours."
+                    )
 
         element_list = config.get_chemical_symbols()
 
-        Al_sites_w_Al_n = random.sample(Al_sites_w_Al_n, int(len(Al_sites_w_Al_n)/2))
+        Al_sites_w_Al_n = random.sample(Al_sites_w_Al_n, int(len(Al_sites_w_Al_n) / 2))
         for Al in Al_sites_w_Al_n:
             if not Possible_Si_sites_w_4_Si:
-                print("No Si sites available for Al sites. This should only happen for strange T concentrations (T1O + T2M) or (T2O + T1M)")
+                print(
+                    "No Si sites available for Al sites. This should only happen for strange T concentrations (T1O + T2M) or (T2O + T1M)"
+                )
                 print("Allow temporary all sites")
                 Possible_Al_sites = []
                 Possible_Al_sites.extend(T1O_site_IDS)
@@ -438,15 +476,14 @@ def main():
 
             local_Si = random.randrange(len(Possible_Si_sites_w_4_Si))
             Si = Possible_Si_sites_w_4_Si.pop(local_Si)
-            element_list[Al] = 'Si'
-            element_list[Si] = 'Al'
+            element_list[Al] = "Si"
+            element_list[Si] = "Al"
         config.set_chemical_symbols(element_list)
         if len(Al_sites_w_Al_n) == 0:
             break
     if not len(Al_sites_w_Al_n) == 0:
         print("Al Sites not converged. Retry please")
         exit()
-
 
     ###### 3. Random distribution of Al and Si atoms + Löwenstein rule is fulfilled + T fractions are fulfilled ######
 
@@ -475,7 +512,7 @@ def main():
         Al_T2M_sites = []
 
         for i in range(len(element_list)):
-            if element_list[i] == 'Al':
+            if element_list[i] == "Al":
                 if i in T1O_site_IDS:
                     T1O_fraction += 1
                     Al_T1O_sites.append(i)
@@ -489,10 +526,10 @@ def main():
                     T2M_fraction += 1
                     Al_T2M_sites.append(i)
 
-            elif element_list[i] == 'Si':
+            elif element_list[i] == "Si":
                 no_Al = True
                 for n in neighbours.get_neighbors(i)[0]:
-                    if config.get_chemical_symbols()[n] == 'Al':
+                    if config.get_chemical_symbols()[n] == "Al":
                         no_Al = False
                 if no_Al:
                     if i in T1O_site_IDS:
@@ -505,27 +542,27 @@ def main():
                         Possible_Si_T2M_sites_w_4_Si.append(i)
         for i in Possible_Si_T1O_sites_w_4_Si:
             for n in neighbours.get_neighbors(i)[0]:
-                if config.get_chemical_symbols()[n] == 'Al':
+                if config.get_chemical_symbols()[n] == "Al":
                     raise ValueError("Possible_Si " + str(i) + " has Al neighbour.")
         for i in Possible_Si_T1M_sites_w_4_Si:
             for n in neighbours.get_neighbors(i)[0]:
-                if config.get_chemical_symbols()[n] == 'Al':
+                if config.get_chemical_symbols()[n] == "Al":
                     raise ValueError("Possible_Si " + str(i) + " has Al neighbour.")
         for i in Possible_Si_T2O_sites_w_4_Si:
             for n in neighbours.get_neighbors(i)[0]:
-                if config.get_chemical_symbols()[n] == 'Al':
+                if config.get_chemical_symbols()[n] == "Al":
                     raise ValueError("Possible_Si " + str(i) + " has Al neighbour.")
         for i in Possible_Si_T2M_sites_w_4_Si:
             for n in neighbours.get_neighbors(i)[0]:
-                if config.get_chemical_symbols()[n] == 'Al':
+                if config.get_chemical_symbols()[n] == "Al":
                     raise ValueError("Possible_Si " + str(i) + " has Al neighbour.")
 
-        T1O_fraction=T1O_fraction/element_list.count('Al')
-        T1M_fraction=T1M_fraction/element_list.count('Al')
-        T2O_fraction=T2O_fraction/element_list.count('Al')
-        T2M_fraction=T2M_fraction/element_list.count('Al')
+        T1O_fraction = T1O_fraction / element_list.count("Al")
+        T1M_fraction = T1M_fraction / element_list.count("Al")
+        T2O_fraction = T2O_fraction / element_list.count("Al")
+        T2M_fraction = T2M_fraction / element_list.count("Al")
 
-        print("Al#  = ", element_list.count('Al'))
+        print("Al#  = ", element_list.count("Al"))
         print("T1O_fraction = ", T1O_fraction)
         print("T1M_fraction = ", T1M_fraction)
         print("T2O_fraction = ", T2O_fraction)
@@ -533,10 +570,20 @@ def main():
 
         if (T1O_bool + T1M_bool + T2O_bool + T2M_bool) == 2:
             #### If only a single setting is present we remove one Al before moving Al since its too crowded.
-            if (T1O_fraction > T1O_frac or T1M_fraction > T1M_frac or T2O_fraction > T2O_frac or T2M_fraction > T2M_frac):
+            if (
+                T1O_fraction > T1O_frac
+                or T1M_fraction > T1M_frac
+                or T2O_fraction > T2O_frac
+                or T2M_fraction > T2M_frac
+            ):
                 Al_sites = [Al_T1O_sites, Al_T1M_sites, Al_T2O_sites, Al_T2M_sites]
                 T_site_ids = [T1O_site_IDS, T1M_site_IDS, T2O_site_IDS, T2M_site_IDS]
-                Al_atom_triage = [T1O_fraction - T1O_frac, T1M_fraction - T1M_frac, T2O_fraction - T2O_frac, T2M_fraction - T2M_frac]
+                Al_atom_triage = [
+                    T1O_fraction - T1O_frac,
+                    T1M_fraction - T1M_frac,
+                    T2O_fraction - T2O_frac,
+                    T2M_fraction - T2M_frac,
+                ]
                 index_too_many_Als = Al_atom_triage.index(max(Al_atom_triage))
                 index_too_few_Als = Al_atom_triage.index(min(Al_atom_triage))
 
@@ -545,7 +592,7 @@ def main():
                 # Already remove one Al
                 Al_to_change = random.randrange(len(Al_possible_change))
                 Al = Al_possible_change[Al_to_change]
-                element_list[Al] = 'Si'
+                element_list[Al] = "Si"
                 config.set_chemical_symbols(element_list)
 
                 Possible_other_Si_sites_w_4_Si = []
@@ -558,10 +605,10 @@ def main():
                 Changed_sites = [Al, *neighbours.get_neighbors(Al)[0]]
                 print("Changed sites:", Changed_sites)
                 for i in Changed_sites:
-                    if element_list[i] == 'Si':
+                    if element_list[i] == "Si":
                         no_Al = True
                         for n in neighbours.get_neighbors(i)[0]:
-                            if config.get_chemical_symbols()[n] == 'Al':
+                            if config.get_chemical_symbols()[n] == "Al":
                                 no_Al = False
                         if no_Al:
                             if i in T_site_ids[index_too_many_Als]:
@@ -576,35 +623,54 @@ def main():
 
                 Si_to_change = random.randrange(len(Si_possible_change))
                 Si = Si_possible_change[Si_to_change]
-                element_list[Si] = 'Al'
+                element_list[Si] = "Al"
 
                 config.set_chemical_symbols(element_list)
             else:
                 correct_fraction_bool = True
 
         else:
-            if (T1O_fraction > T1O_frac or T1M_fraction > T1M_frac or T2O_fraction > T2O_frac or T2M_fraction > T2M_frac):
+            if (
+                T1O_fraction > T1O_frac
+                or T1M_fraction > T1M_frac
+                or T2O_fraction > T2O_frac
+                or T2M_fraction > T2M_frac
+            ):
 
                 Al_sites = [Al_T1O_sites, Al_T1M_sites, Al_T2O_sites, Al_T2M_sites]
-                Al_atom_triage = [T1O_fraction - T1O_frac, T1M_fraction - T1M_frac, T2O_fraction - T2O_frac, T2M_fraction - T2M_frac]
-                
-                ## Maybe if we choose the index to move/remove randomly, weighted by the triage we would get good convergence 
+                Al_atom_triage = [
+                    T1O_fraction - T1O_frac,
+                    T1M_fraction - T1M_frac,
+                    T2O_fraction - T2O_frac,
+                    T2M_fraction - T2M_frac,
+                ]
+
+                ## Maybe if we choose the index to move/remove randomly, weighted by the triage we would get good convergence
                 ## also for strange concentrations
                 index_too_many_Als = Al_atom_triage.index(max(Al_atom_triage))
                 index_too_few_Als = Al_atom_triage.index(min(Al_atom_triage))
 
                 Al_possible_change = Al_sites[index_too_many_Als]
-                Si_sites = [Possible_Si_T1O_sites_w_4_Si, Possible_Si_T1M_sites_w_4_Si, Possible_Si_T2O_sites_w_4_Si, Possible_Si_T2M_sites_w_4_Si]
+                Si_sites = [
+                    Possible_Si_T1O_sites_w_4_Si,
+                    Possible_Si_T1M_sites_w_4_Si,
+                    Possible_Si_T2O_sites_w_4_Si,
+                    Possible_Si_T2M_sites_w_4_Si,
+                ]
 
                 minmax_bool = True
                 if minmax_bool:
                     Si_possible_change = Si_sites[index_too_few_Als]
-                
+
                 while not Si_possible_change:
                     ####### This should only happen for a strange concentrations.
                     ####### The algorithm should still converge but might take much longer
 
-                    print("No free Sis in", ["T1O", "T1M", "T2O", "T2M"][index_too_few_Als], "Lateral move")
+                    print(
+                        "No free Sis in",
+                        ["T1O", "T1M", "T2O", "T2M"][index_too_few_Als],
+                        "Lateral move",
+                    )
                     Si_possible_change = random.choice(Si_sites)
 
                 Al_to_change = random.randrange(len(Al_possible_change))
@@ -615,8 +681,8 @@ def main():
                 print(Al_possible_change, Al)
                 print(Si_possible_change, Si)
 
-                element_list[Al] = 'Si'
-                element_list[Si] = 'Al'
+                element_list[Al] = "Si"
+                element_list[Si] = "Al"
                 config.set_chemical_symbols(element_list)
 
             else:
@@ -627,19 +693,20 @@ def main():
             AlNr += 1
             no_Al = True
             for n in neighbours.get_neighbors(i)[0]:
-                if config.get_chemical_symbols()[n] == 'Al':
+                if config.get_chemical_symbols()[n] == "Al":
                     no_Al = False
-                    print("ERROR: Al " + str(Al) +  " has Al neighbours. EXIT")
+                    print("ERROR: Al " + str(Al) + " has Al neighbours. EXIT")
                     exit()
 
-    print("Al#  = ", element_list.count('Al'))
+    print("Al#  = ", element_list.count("Al"))
     print("T1O_fraction = ", T1O_fraction)
     print("T1M_fraction = ", T1M_fraction)
     print("T2O_fraction = ", T2O_fraction)
     print("T2M_fraction = ", T2M_fraction)
 
-
-    ase.io.lammpsdata.write_lammps_data('output.lmp', config, specorder=['O', 'K', 'Na', 'Al', 'Si'])
+    ase.io.lammpsdata.write_lammps_data(
+        "output.lmp", config, specorder=["O", "K", "Na", "Al", "Si"]
+    )
 
 
 if __name__ == "__main__":
