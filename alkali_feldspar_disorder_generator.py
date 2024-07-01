@@ -1,4 +1,3 @@
-# %%
 import random
 
 import ase
@@ -168,7 +167,6 @@ def build_reference_system(x_dim, y_dim, z_dim):
 
     return config
 
-# %%
 def allUnique(x):
     seen = set()
     return not any(i in seen or seen.add(i) for i in x)
@@ -190,16 +188,9 @@ def parse_command_line(args=None):
 
     return args
 
-# %%
-
 def main():
 
     args = parse_command_line()
-
-    #T1M_bool = args.T1M_bool
-    #T2O_bool = args.T2O_bool
-    #T2M_bool = args.T2M_bool
-    #T1O_frac = args.T1O_frac
 
     T1O_frac = args.T1O_frac
     T1M_frac = args.T1M_frac
@@ -219,20 +210,10 @@ def main():
     print("T2O_bool = ", T2O_bool)
     print("T2M_bool = ", T2M_bool)
 
-    #if T1M_frac > 0:
-    #    T1M_bool = True
-    #if T2O_frac > 0:
-    #    T2O_bool = True
-    #if T2M_frac > 0:
-    #    T2M_bool = True
-
     sqsgenerator_NaK = args.sqsGen_NaK
 
     x_dim, y_dim, z_dim = args.supercell_dim
     Na_fraction = args.Na_fraction
-    NaK_SQS_bool = False
-
-    retry = False
 
     config = build_reference_system(x_dim, y_dim, z_dim)
     print("Built atoms template:", config)
@@ -267,7 +248,6 @@ def main():
             elements_initialize.append('Si')
 
     Possible_Al_sites = []
-    #Possible_Al_sites.extend(T1O_site_IDS)
 
     if T1O_bool:
         Possible_Al_sites.extend(T1O_site_IDS)
@@ -332,7 +312,7 @@ def main():
         print(config_return)
 
         config = config_return
-        #result = sqsgenerator.public.to_ase_atoms(results)
+
     else:
         ### Just change Na_fraction * K atoms to Na atoms randomly
         K_to_change = random.sample(range(element_list.count('K')), int(element_list.count('K')*Na_fraction))
@@ -438,8 +418,6 @@ def main():
                     raise ValueError("Si " + str(i) + " has " + str(Si_Al_sanity_int) + " neighbours.")
 
         element_list = config.get_chemical_symbols()
-        #print("Al_sites_w_Al_n:", Al_sites_w_Al_n)
-        #print("Possible_Si_sites_w_4_Si", Possible_Si_sites_w_4_Si)
 
         Al_sites_w_Al_n = random.sample(Al_sites_w_Al_n, int(len(Al_sites_w_Al_n)/2))
         for Al in Al_sites_w_Al_n:
@@ -661,11 +639,8 @@ def main():
     print("T2M_fraction = ", T2M_fraction)
 
 
-    ase.io.lammpsdata.write_lammps_data('ASE_2x2x3_microcline_pristine.lmp', config, specorder=['O', 'K', 'Na', 'Al', 'Si'])
+    ase.io.lammpsdata.write_lammps_data('output.lmp', config, specorder=['O', 'K', 'Na', 'Al', 'Si'])
 
 
 if __name__ == "__main__":
     main()
-
-
-# %%
