@@ -1,6 +1,11 @@
 # Alkali feldspar disorder generator
 This standalone Python script constructs alkali feldspar supercells with precisely defined Al-Si and Na-K disorder to use in atomistic simulations. It depends on the ASE package and can optionally utilize the sqsgenerator package. This script was introduced in the manuscript:
-TODO
+
+A. Gorfer, D. Heuser, R. Abart, and C. Dellago, <br>
+"Thermodynamics of alkali feldspar solid solutions with varying <br>
+Al-Si order: atomistic simulations using a neural network potential", <br>
+[arXiv:2407.17452](https://doi.org/10.48550/arXiv.2407.17452) [cond-mat.mtrl-sci] (2024).
+
 ## Input settings
 ```
 --supercell_dim   # The multiplicity of the supercell in a b c (e.g. 3 3 3) 
