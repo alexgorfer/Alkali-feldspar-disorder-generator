@@ -3,7 +3,7 @@ This standalone Python script constructs alkali feldspar supercells with precise
 
 A. Gorfer, D. Heuser, R. Abart, and C. Dellago, <br>
 "Thermodynamics of alkali feldspar solid solutions with varying <br>
-Al-Si order: atomistic simulations using a neural network potential", <br>
+Al-Si order: Atomistic simulations using a neural network potential", <br>
 [arXiv:2407.17452](https://doi.org/10.48550/arXiv.2407.17452) [cond-mat.mtrl-sci] (2024).
 
 ## Input settings
